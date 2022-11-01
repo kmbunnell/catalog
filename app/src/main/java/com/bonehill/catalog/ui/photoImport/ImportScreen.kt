@@ -1,6 +1,5 @@
 package com.bonehill.catalog.ui.photoImport
 
-import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -11,30 +10,28 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.mlkit.vision.common.InputImage
 
 
 @Composable
-fun ImportScreen(
-){
+fun ImportScreen( viewModel:ImportScreenVM = hiltViewModel()){
 
     Surface(
         color= MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ){
-        var result by rememberSaveable { mutableStateOf<Uri?>(null) }
+        val context = LocalContext.current
         val pickMedia =
             rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 // Callback is invoked after the user selects a media item or closes the
                 // photo picker.
-                if (uri != null) {
+                uri?.let {
                     Log.d("PhotoPicker", "Selected URI: $uri")
-                } else {
-                    Log.d("PhotoPicker", "No media selected")
+                    viewModel.processImage( InputImage.fromFilePath(context, uri))
                 }
             }
 

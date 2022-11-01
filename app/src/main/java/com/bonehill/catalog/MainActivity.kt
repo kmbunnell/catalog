@@ -13,7 +13,9 @@ import com.bonehill.catalog.ui.navigation.BottomNavBar
 import com.bonehill.catalog.ui.navigation.Catalog
 import com.bonehill.catalog.ui.navigation.CatalogNavHost
 import com.bonehill.catalog.ui.navigation.PhotoImport
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
