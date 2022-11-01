@@ -3,8 +3,10 @@ package com.bonehill.catalog
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.bonehill.catalog.ui.theme.CatalogTheme
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) {
-                    CatalogNavHost(navController=navController)
+                    CatalogNavHost(navController=navController, modifier = Modifier.padding(it))
                 }
             }
         }
