@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
@@ -24,6 +25,7 @@ import com.google.mlkit.vision.common.InputImage
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 
 
 @Composable
@@ -34,7 +36,6 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
         modifier = Modifier.fillMaxSize()
     ) {
 
-        //val bookList by remember { viewModel.txtList }
         Column(
             modifier = Modifier.padding(
                 horizontal = 8.dp,
@@ -52,13 +53,15 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
                                 Log.d("PhotoPicker", "Selected URI: $uri")
                                 try {
                                     Log.d("PhotoPicker", "Attempting decode image to bitmap")
-                                    // viewModel.findImageText(InputImage.fromFilePath(context, uri))
+
                                     viewModel.findImageText(
+                                        InputImage.fromFilePath(context, uri),
                                         ImageDecoder.decodeBitmap(
                                             ImageDecoder
                                                 .createSource(context.contentResolver, uri)
                                         )
                                     )
+
                                 } catch (ex: java.lang.Exception) {
                                     Log.d("PhotoPicker", "Failed decode image to bitmap")
                                     viewModel.setError("Error decoding image: ${ex.localizedMessage}")
@@ -79,22 +82,28 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
 
                 is ImportPhotoState.ProcessedImage -> {
 
-                    Image(bitmap = state.bitmap.asImageBitmap(),
+                  /*  Image(
+                        bitmap = state.bitmap.asImageBitmap(),
                         contentDescription = "Selected Image",
-                    modifier = Modifier.fillMaxSize())
-
+                        modifier = Modifier.fillMaxSize().
+                        pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = {
+                                    state.text
+                                    var k = it.x
+                                }
+                            )
+                        }
+                    )*/
+                    TextList(lst = state.lst)
 
                 }
 
                 is ImportPhotoState.Error -> {
                     Text(text = state.message)
                 }
-
             }
-
-
         }
-
     }
 }
 

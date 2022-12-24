@@ -19,23 +19,26 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ImportScreenVM @Inject constructor() : ViewModel() {
-    var txtList = mutableStateOf<List<String>>(listOf())
+
 
     private val _currentState = mutableStateOf<ImportPhotoState>(ImportPhotoState.Ready)
     val uiState: State<ImportPhotoState>
         get() = _currentState
 
-    fun findImageText(img: InputImage) {
+    fun findImageText(img: InputImage, chosenImage: Bitmap) {
 
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
         val lst = mutableListOf<String>()
 
         recognizer.process(img)
             .addOnSuccessListener { text ->
+                lst.add(text.text)
                 /*  text.textBlocks.forEach{ block->
                       lst.add(block.text)
-                  }
-                  txtList.value=lst.distinct()*/
+                  }*/
+
+                _currentState.value = ImportPhotoState.ProcessedImage(text, chosenImage, lst)
+
 
             }
             .addOnFailureListener { e -> // Task failed with an exception
@@ -45,18 +48,19 @@ class ImportScreenVM @Inject constructor() : ViewModel() {
             }
     }
 
-    fun findImageText(chosenImage: Bitmap) {
+   /* this is returning 0 text when I hand it the bitmap.  Need to revisit.
+   fun findImageText(chosenImage: Bitmap) {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        recognizer.process(InputImage.fromBitmap(chosenImage, 0))
+        recognizer.process(InputImage.fromBitmap(chosenImage, 90))
             .addOnSuccessListener { text ->
                 _currentState.value = ImportPhotoState.ProcessedImage(text, chosenImage)
             }
-            .addOnFailureListener { e -> // Task failed with an exception
+            .addOnFailureListener { e ->
                 e.printStackTrace()
                 _currentState.value =
                     ImportPhotoState.Error("Failed to find text : ${e.localizedMessage}")
             }
-    }
+    }*/
 
     fun setError(msg: String) {
         _currentState.value = ImportPhotoState.Error(msg)
