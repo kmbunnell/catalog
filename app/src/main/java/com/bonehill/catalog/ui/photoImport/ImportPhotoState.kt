@@ -6,7 +6,7 @@ import com.google.mlkit.vision.text.Text
 sealed class ImportPhotoState{
 
     object Ready: ImportPhotoState()
-    data class ProcessedImage(val text: Text,val  bitmap: Bitmap, val lst:List<String>):ImportPhotoState()
+    data class ProcessedImage(val text: Text,val  bitmap: Bitmap, val lst:List<Text.TextBlock>):ImportPhotoState()
     data class Error (val message:String): ImportPhotoState()
 
 }

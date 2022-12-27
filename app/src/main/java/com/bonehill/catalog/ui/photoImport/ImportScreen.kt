@@ -1,12 +1,13 @@
 package com.bonehill.catalog.ui.photoImport
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.util.Log
-import android.widget.ImageView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -24,8 +25,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.mlkit.vision.common.InputImage
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color.Companion.Blue
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntSize
+import com.google.mlkit.vision.text.Text
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -82,8 +92,14 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
 
                 is ImportPhotoState.ProcessedImage -> {
 
-                  /*  Image(
+                  val w = state.bitmap.asImageBitmap().width
+                    val h = state.bitmap.asImageBitmap().height
+                    val img = state.bitmap.asImageBitmap()
+
+
+                   /*Image(
                         bitmap = state.bitmap.asImageBitmap(),
+
                         contentDescription = "Selected Image",
                         modifier = Modifier.fillMaxSize().
                         pointerInput(Unit) {
@@ -91,11 +107,32 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
                                 onTap = {
                                     state.text
                                     var k = it.x
+
                                 }
                             )
                         }
                     )*/
-                    TextList(lst = state.lst)
+                    /*val customPainter = remember {
+                        object : Painter() {
+
+                            override val intrinsicSize: Size
+                                get() = Size(img.width.toFloat(), img.height.toFloat())
+
+                            override fun DrawScope.onDraw() {
+                                drawImage(img)
+                                drawLine(
+                                    color = androidx.compose.ui.graphics.Color.Red,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(img.width.toFloat(), img.height.toFloat()),
+                                    strokeWidth = 5f
+                                )
+                            }
+                        }
+                    }
+                    Image(painter = customPainter, contentDescription = null)*/
+                   // TextList(lst = state.lst)
+
+                    ImageCanvas(img, state.lst)
 
                 }
 
@@ -107,6 +144,43 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
     }
 }
 
+@Composable
+fun ImageCanvas(imageBitmap: ImageBitmap, blocks:List<Text.TextBlock>) {
+
+    Canvas(modifier = Modifier.fillMaxSize(
+
+    )) {
+
+        val canvasWidth = size.width.roundToInt()
+        val canvasHeight = size.height.roundToInt()
+
+        drawImage(
+            image = imageBitmap,
+            srcSize = IntSize(imageBitmap.width, imageBitmap.height),
+            dstSize = IntSize(canvasWidth, canvasHeight),
+
+
+        )
+
+        blocks[3].boundingBox?.let{
+            val size = Size(it.width().toFloat(), it.height().toFloat())
+            blocks[3].cornerPoints
+            drawRect(
+                color = Blue,
+                size = size,
+                topLeft = Offset(it.left.toFloat() + 8, it.top.toFloat()),
+                alpha = .50f
+
+            )
+        }
+
+        /*blocks.forEach {
+            drawRect()
+
+        }*/
+
+    }
+}
 
 @Composable
 fun TextList(lst: List<String>) {

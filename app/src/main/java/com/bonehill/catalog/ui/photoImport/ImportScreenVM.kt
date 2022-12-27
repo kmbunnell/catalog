@@ -33,12 +33,14 @@ class ImportScreenVM @Inject constructor() : ViewModel() {
         recognizer.process(img)
             .addOnSuccessListener { text ->
                 lst.add(text.text)
+                text.textBlocks
                 /*  text.textBlocks.forEach{ block->
                       lst.add(block.text)
                   }*/
 
-                _currentState.value = ImportPhotoState.ProcessedImage(text, chosenImage, lst)
-
+                _currentState.value = ImportPhotoState.ProcessedImage(text, chosenImage, text.textBlocks)
+                var w = chosenImage.width
+                var h = chosenImage.height
 
             }
             .addOnFailureListener { e -> // Task failed with an exception
