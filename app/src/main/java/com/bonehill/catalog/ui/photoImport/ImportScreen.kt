@@ -3,7 +3,9 @@ package com.bonehill.catalog.ui.photoImport
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.ImageDecoder
+import android.graphics.Rect
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,6 +35,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
 import com.google.mlkit.vision.text.Text
 import kotlin.math.roundToInt
@@ -96,43 +99,19 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
                     val h = state.bitmap.asImageBitmap().height
                     val img = state.bitmap.asImageBitmap()
 
+                //draw image into canvas, draw blocks on top
+                  ImageCanvas(img, state.lst)
 
-                   /*Image(
-                        bitmap = state.bitmap.asImageBitmap(),
-
-                        contentDescription = "Selected Image",
-                        modifier = Modifier.fillMaxSize().
-                        pointerInput(Unit) {
-                            detectTapGestures(
-                                onTap = {
-                                    state.text
-                                    var k = it.x
-
-                                }
-                            )
-                        }
-                    )*/
-                    /*val customPainter = remember {
-                        object : Painter() {
-
-                            override val intrinsicSize: Size
-                                get() = Size(img.width.toFloat(), img.height.toFloat())
-
-                            override fun DrawScope.onDraw() {
-                                drawImage(img)
-                                drawLine(
-                                    color = androidx.compose.ui.graphics.Color.Red,
-                                    start = Offset(0f, 0f),
-                                    end = Offset(img.width.toFloat(), img.height.toFloat()),
-                                    strokeWidth = 5f
-                                )
-                            }
-                        }
-                    }
-                    Image(painter = customPainter, contentDescription = null)*/
-                   // TextList(lst = state.lst)
-
-                    ImageCanvas(img, state.lst)
+                //lay canvas over image and draw blocks into blank canvas
+                /* Box(modifier = Modifier.fillMaxSize())
+                    {
+                        Image(
+                            bitmap = state.bitmap.asImageBitmap(),
+                            contentDescription = "Selected Image",
+                            contentScale = ContentScale.Fit
+                        )
+                        ImageCanvas(img, state.lst)
+                    }*/
 
                 }
 
@@ -147,19 +126,29 @@ fun ImportScreen(viewModel: ImportScreenVM = hiltViewModel()) {
 @Composable
 fun ImageCanvas(imageBitmap: ImageBitmap, blocks:List<Text.TextBlock>) {
 
-    Canvas(modifier = Modifier.fillMaxSize(
+    val rect =  blocks[3].boundingBox?.let{ Rect(it.top, it.left, it.right, it.bottom) }
+    val context = LocalContext.current
+    Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit){
+        detectTapGestures (
+            onTap={ tapOffset->
+               val top = rect?.top
+                val left = rect?.left
+                Toast.makeText(context, "Found it: ${tapOffset.x}, ${tapOffset.y}", Toast.LENGTH_SHORT).show()
+              /*val tap = true
+                rect?.let {
+                    if( it.contains(tapOffset.x.toInt(), tapOffset.y.toInt()))
+                    {
+                        Toast.makeText(context, "Found it", Toast.LENGTH_SHORT).show()
+                    }
+                }*/
+            })
 
-    )) {
-
-        val canvasWidth = size.width.roundToInt()
-        val canvasHeight = size.height.roundToInt()
+    }) {
 
         drawImage(
             image = imageBitmap,
             srcSize = IntSize(imageBitmap.width, imageBitmap.height),
-            dstSize = IntSize(canvasWidth, canvasHeight),
-
-
+            dstSize = IntSize(imageBitmap.width, imageBitmap.height),
         )
 
         blocks[3].boundingBox?.let{
@@ -168,7 +157,7 @@ fun ImageCanvas(imageBitmap: ImageBitmap, blocks:List<Text.TextBlock>) {
             drawRect(
                 color = Blue,
                 size = size,
-                topLeft = Offset(it.left.toFloat() + 8, it.top.toFloat()),
+                topLeft = Offset(it.left.toFloat(), it.top.toFloat()),
                 alpha = .50f
 
             )
